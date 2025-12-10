@@ -1,121 +1,134 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galería con Skeleton y Descripciones</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f2f2f2;
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .skeleton {
-            width: 100%;
-            padding-bottom: 75%; /* Relación 4:3 */
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .skeleton::after {
-            content: '';
-            display: block;
-            position: absolute;
-            top: 0;
-            left: -150px;
-            height: 100%;
-            width: 150px;
-            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
-            animation: loading 1.5s infinite;
-        }
-
-        @keyframes loading {
-            0% { left: -150px; }
-            100% { left: 100%; }
-        }
-
-        .gallery-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .gallery-item img {
-            width: 100%;
-            border-radius: 10px;
-        }
-
-        .description {
-            margin-top: 5px;
-            font-size: 14px;
-            color: #333;
-            text-align: center;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería Mejorada con Skeleton</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Galería de Fotos</h1>
+<h1>Galería de Fotos</h1>
 
-    <div class="gallery" id="gallery">
-        <!-- Skeletons iniciales -->
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-    </div>
+<div class="actions">
+    <button id="addItemBtn">Agregar Item</button>
+</div>
 
-    <script>
-        // Lista de imágenes locales y sus descripciones
-        const images = [
-            { src: 'assests/images/39148024_2330279200533416_8193818691821895680_n.jpg', desc: 'Foto de paisaje 1' },
-            { src: 'assests/images/314702973_441148237974739_7216540223996435729_n.jpg', desc: 'Foto de ciudad' },
-            { src: 'assests/images/314857375_1763815637331049_6855538066856860782_n.jpg', desc: 'Foto de montaña' },
-            { src: 'assests/images/IMG_0295.JPG', desc: 'Retrato 1' },
-            { src: 'assests/images/IMG_0497.JPG', desc: 'Retrato 2' },
-            { src: 'assests/images/IMG_0523.JPG', desc: 'Foto artística' }
-        ];
+<div class="gallery" id="gallery">
+    <!-- Skeletons iniciales -->
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+</div>
 
-        const gallery = document.getElementById('gallery');
+<div id="emptyState" class="empty-state hidden">
+    <img src="assets/images/empty.svg" alt="Empty" class="empty-img">
+    <p>No tienes imágenes en la galería. ¡Agrega tu primera foto!</p>
+    <button id="addFirstItem">Agregar Foto</button>
+</div>
 
-        function loadImages() {
-            gallery.innerHTML = ''; // Limpiar skeletons
-            images.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'gallery-item';
+<div id="errorMsg" class="error hidden">
+    <p>Ocurrió un error al realizar la acción.</p>
+    <button id="retryBtn">Reintentar</button>
+</div>
 
-                const img = document.createElement('img');
-                img.src = item.src;
+<script>
+const gallery = document.getElementById('gallery');
+const emptyState = document.getElementById('emptyState');
+const errorMsg = document.getElementById('errorMsg');
+const addItemBtn = document.getElementById('addItemBtn');
+const retryBtn = document.getElementById('retryBtn');
+const addFirstItem = document.getElementById('addFirstItem');
 
-                const desc = document.createElement('div');
-                desc.className = 'description';
-                desc.textContent = item.desc;
+// Lista de imágenes originales
+let images = [
+    { src: 'assests/images/gata1.webp', desc: 'Gata tomando agua en el grifo' },
+    { src: 'assests/images/gata2.webp', desc: 'Gata sacando la lengua' },
+    { src: 'assests/images/gata3.webp', desc: 'Gata con cara de "qué dijiste?"' },
+    { src: 'assests/images/pan.webp', desc: 'Pan' },
+    { src: 'assests/images/gato.webp', desc: 'Gato bobo' },
+    { src: 'assests/images/gato2.webp', desc: 'Gato enjado >:|' }
+];
 
-                div.appendChild(img);
-                div.appendChild(desc);
-                gallery.appendChild(div);
-            });
+// Cargar la galería
+function loadGallery() {
+    gallery.innerHTML = '';
+    if(images.length === 0){
+        emptyState.classList.remove('hidden');
+        return;
+    } else {
+        emptyState.classList.add('hidden');
+    }
+
+    images.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.width = 250; // ayuda a prevenir CLS
+        img.height = 188; // mantiene relación 4:3
+        img.alt = item.desc;
+
+        const desc = document.createElement('div');
+        desc.className = 'description';
+        desc.textContent = item.desc;
+
+        div.appendChild(img);
+        div.appendChild(desc);
+        gallery.appendChild(div);
+    });
+}
+
+// Skeleton inicial
+function showSkeletons() {
+    gallery.innerHTML = '';
+    for(let i=0; i<3; i++){
+        const skel = document.createElement('div');
+        skel.className = 'skeleton';
+        gallery.appendChild(skel);
+    }
+    setTimeout(loadGallery, 2000);
+}
+
+// Optimistic UI: agregar item
+function addItemOptimistic() {
+    const newItem = { src: 'assets/images/IMG_0295.JPG', desc: 'Nueva imagen agregada' };
+    images.push(newItem);
+    loadGallery(); // actualización inmediata
+
+    let undoTimeout = setTimeout(() => {
+        if(Math.random() < 0.5){ // error aleatorio
+            images.pop();
+            loadGallery();
+            errorMsg.classList.remove('hidden');
         }
+    }, 2000);
 
-        // Simular tiempo de carga
-        setTimeout(loadImages, 2000);
-    </script>
+    const undoBtn = document.createElement('button');
+    undoBtn.textContent = 'Deshacer';
+    undoBtn.onclick = () => {
+        clearTimeout(undoTimeout);
+        images.pop();
+        loadGallery();
+        undoBtn.remove();
+    };
+    gallery.parentNode.insertBefore(undoBtn, gallery.nextSibling);
+    setTimeout(() => undoBtn.remove(), 5000);
+}
+
+// Event listeners
+addItemBtn.addEventListener('click', addItemOptimistic);
+retryBtn.addEventListener('click', () => {
+    errorMsg.classList.add('hidden');
+    addItemOptimistic();
+});
+addFirstItem.addEventListener('click', () => {
+    emptyState.classList.add('hidden');
+    addItemOptimistic();
+});
+
+// Inicial
+showSkeletons();
+</script>
 </body>
 </html>
