@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería con Skeleton y Descripciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .skeleton {
+            width: 100%;
+            padding-bottom: 75%; /* Relación 4:3 */
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .skeleton::after {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: -150px;
+            height: 100%;
+            width: 150px;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { left: -150px; }
+            100% { left: 100%; }
+        }
+
+        .gallery-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .description {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Galería de Fotos</h1>
+
+    <div class="gallery" id="gallery">
+        <!-- Skeletons iniciales -->
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+    </div>
+
+    <script>
+        // Lista de imágenes locales y sus descripciones
+        const images = [
+            { src: 'assests/images/39148024_2330279200533416_8193818691821895680_n.jpg', desc: 'Foto de paisaje 1' },
+            { src: 'assests/images/314702973_441148237974739_7216540223996435729_n.jpg', desc: 'Foto de ciudad' },
+            { src: 'assests/images/314857375_1763815637331049_6855538066856860782_n.jpg', desc: 'Foto de montaña' },
+            { src: 'assests/images/IMG_0295.JPG', desc: 'Retrato 1' },
+            { src: 'assests/images/IMG_0497.JPG', desc: 'Retrato 2' },
+            { src: 'assests/images/IMG_0523.JPG', desc: 'Foto artística' }
+        ];
+
+        const gallery = document.getElementById('gallery');
+
+        function loadImages() {
+            gallery.innerHTML = ''; // Limpiar skeletons
+            images.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+
+                const img = document.createElement('img');
+                img.src = item.src;
+
+                const desc = document.createElement('div');
+                desc.className = 'description';
+                desc.textContent = item.desc;
+
+                div.appendChild(img);
+                div.appendChild(desc);
+                gallery.appendChild(div);
+            });
+        }
+
+        // Simular tiempo de carga
+        setTimeout(loadImages, 2000);
+    </script>
+</body>
+</html>
